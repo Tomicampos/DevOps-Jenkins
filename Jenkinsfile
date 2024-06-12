@@ -27,7 +27,7 @@ pipeline {
             steps {
                 // Muestra el directorio de trabajo actual.
                 // Lista los archivos del directorio con detalles.
-                // Construye una imagen Docker etiquetada como 'mundoseapp'.
+                // Construye una imagen Docker etiquetada como 'testapp'.
                 sh '''
                     pwd
                     ls -ltr
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Run tests') {  // Tercer stage: Ejecuta pruebas en la imagen Docker construida.
             steps {
-                sh "docker run mundoseapp npm test"  // Ejecuta 'npm test' dentro de un contenedor Docker creado a partir de la imagen 'testapp'.
+                sh "docker run testapp npm test"  // Ejecuta 'npm test' dentro de un contenedor Docker creado a partir de la imagen 'testapp'.
             }
         }
 
@@ -65,7 +65,7 @@ pipeline {
                 
                 // Ejecuta el escáner de vulnerabilidades Trivy en la imagen.
                 sh """
-                    docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity=CRITICAL mromanolazaro/mundoseapp:${version}
+                    docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity=CRITICAL tomicampos22/testapp:${version}
                 """
                 }
             }
@@ -75,10 +75,10 @@ pipeline {
         stage('Pass To microK8s') {  // Stage comentado: Implementación en Kubernetes (comentado para no ejecutarse).
             steps {
                 sh '''
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl create deployment mundoseapp --image=mundoseapp:${version}"  // Crea un deployment en Kubernetes usando la imagen.
+                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl create deployment testapp --image=testapp:${version}"  // Crea un deployment en Kubernetes usando la imagen.
                 echo "Wait"
                 sleep 10  // Espera 10 segundos.
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl expose deployment mundoseapp --port=3000"  // Expone el deployment en el puerto 3000.
+                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl expose deployment testapp --port=3000"  // Expone el deployment en el puerto 3000.
                 sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "wget https://raw.githubusercontent.com/tercemundo/platzi-scripts-integracion/master/webapp/nodePort.yml"  // Descarga un archivo de configuración de Kubernetes.
                 sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl apply -f nodePort.yml"  // Aplica el archivo de configuración descargado.
                 '''
