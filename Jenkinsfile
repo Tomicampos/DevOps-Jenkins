@@ -65,7 +65,7 @@ pipeline {
                 
                 // Ejecuta el escáner de vulnerabilidades Trivy en la imagen.
                 sh """
-                    docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity=CRITICAL tomicampos22/testapp:${version}
+                    docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity=CRITICAL tomicampos22/jenkins-devops:${version}
                 """
                 }
             }
