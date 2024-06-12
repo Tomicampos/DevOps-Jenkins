@@ -72,18 +72,32 @@ pipeline {
         }
 
         
-        stage('Pass To microK8s') {  // Stage comentado: Implementación en Kubernetes (comentado para no ejecutarse).
-            steps {
-                sh '''
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl create deployment jenkins-devops --image=jenkins-devops:${version}"  // Crea un deployment en Kubernetes usando la imagen.
+        stage('Pass To microK8s') {
+    steps {
+        script {
+            // Define la dirección IP del servidor remoto
+            def remoteHost = '172.17.0.1'
+            // Define el nombre de usuario para la conexión SSH
+            def sshUser = 'user'
+            // Define el comando kubectl que deseas ejecutar
+            def kubectlCommand = '''
+                kubectl create deployment jenkins-devops --image=jenkins-devops:${version}
                 echo "Wait"
-                sleep 10  // Espera 10 segundos.
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl expose deployment jenkins-devops --port=3000"  // Expone el deployment en el puerto 3000.
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "wget https://raw.githubusercontent.com/tercemundo/platzi-scripts-integracion/master/webapp/nodePort.yml"  // Descarga un archivo de configuración de Kubernetes.
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl apply -f nodePort.yml"  // Aplica el archivo de configuración descargado.
-                '''
-            }
+                sleep 10
+                kubectl expose deployment jenkins-devops --port=3000
+                wget https://raw.githubusercontent.com/tercemundo/platzi-scripts-integracion/master/webapp/nodePort.yml
+                kubectl apply -f nodePort.yml
+            '''
+            // Ejecuta los comandos a través de SSH
+            sshCommand(
+                remote: remoteHost,
+                user: sshUser,
+                command: kubectlCommand
+            )
         }
+    }
+}
+
         
     }
 }
