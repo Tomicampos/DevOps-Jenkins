@@ -71,19 +71,19 @@ pipeline {
             }
         }
 
-        /*
+        
         stage('Pass To microK8s') {  // Stage comentado: Implementación en Kubernetes (comentado para no ejecutarse).
             steps {
                 sh '''
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl create deployment testapp --image=testapp:${version}"  // Crea un deployment en Kubernetes usando la imagen.
+                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl create deployment jenkins-devops --image=jenkins-devops:${version}"  // Crea un deployment en Kubernetes usando la imagen.
                 echo "Wait"
                 sleep 10  // Espera 10 segundos.
-                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl expose deployment testapp --port=3000"  // Expone el deployment en el puerto 3000.
+                sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl expose deployment jenkins-devops --port=3000"  // Expone el deployment en el puerto 3000.
                 sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "wget https://raw.githubusercontent.com/tercemundo/platzi-scripts-integracion/master/webapp/nodePort.yml"  // Descarga un archivo de configuración de Kubernetes.
                 sshpass -p 'master' ssh 172.17.0.1 -l root -o StrictHostKeyChecking=no "kubectl apply -f nodePort.yml"  // Aplica el archivo de configuración descargado.
                 '''
             }
         }
-        */
+        
     }
 }
